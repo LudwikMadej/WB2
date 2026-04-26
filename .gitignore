@@ -212,5 +212,5 @@ __marimo__/
 # Archived POC data (not used by active pipeline)
 archive/checkpoint1/data/
 
-# Legacy CSV activations — pipeline uses parquet now
-data/activations/**/*.csv
+# Activations — generated data, too large for git
+data/activations/
