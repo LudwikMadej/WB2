@@ -57,6 +57,32 @@ uv export --format requirements-txt --no-hashes --no-emit-project \
 
 Nie edytuj `requirements.txt` ręcznie.
 
+## Dane (obrazy + aktywacje)
+
+Katalog `data/` nie jest w git (za duży). Synchronizacja przez Google Drive + `rclone`.
+
+**Jednorazowy setup:**
+
+```bash
+brew install rclone          # macOS (lub: curl https://rclone.org/install.sh | sudo bash)
+rclone config                # n → name: gdrive → Google Drive → OAuth
+```
+
+**Pobranie danych (nowy klon):**
+
+```bash
+./scripts/sync_data.sh download
+```
+
+**Dwukierunkowy sync (po zmianach lokalnych lub na Drive):**
+
+```bash
+./scripts/sync_data.sh init   # tylko za pierwszym razem — tworzy baseline
+./scripts/sync_data.sh sync   # potem: synchronizuje zmiany w obu kierunkach
+```
+
+Dane na Drive: https://drive.google.com/drive/folders/1kVsIX2EP_0RTF7BmFu7rJkXC0vd4jPbt
+
 ## Kolejność notatników
 
 `01_loading_data` → `02_getting_activations` → `03_concepts_detection` → `04_concepts_detection_after_debiasing`.
