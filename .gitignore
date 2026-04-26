@@ -205,3 +205,12 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# macOS
+.DS_Store
+
+# Archived POC data (not used by active pipeline)
+archive/checkpoint1/data/
+
+# Activations — generated data, too large for git
+data/activations/
