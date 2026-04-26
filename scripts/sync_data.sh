@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REMOTE="gdrive:WB2/data"
-LOCAL="$(cd "$(dirname "$0")/.." && pwd)/data"
+REPO="$(cd "$(dirname "$0")/.." && pwd)"
+LOCAL="$REPO/data"
+BUCKET="wb2"
+ENDPOINT="https://f681dbaf79de38cf431e125730894e42.r2.cloudflarestorage.com"
+ACCESS_KEY="8e7789ce4343edb621c9da7a0a8740fe"
+SECRET_KEY="244bb6fbc0216445e0d8cef64b89d7c520d58e79d137ccf10ac9ae119c363002"
 
 if ! command -v rclone &>/dev/null; then
     echo "rclone not found. Install:"
@@ -11,45 +15,32 @@ if ! command -v rclone &>/dev/null; then
     exit 1
 fi
 
-if ! rclone listremotes | grep -q '^gdrive:'; then
-    echo "No 'gdrive' remote configured. Run:"
-    echo "  rclone config"
-    echo "  → n (new) → name: gdrive → Google Drive → follow OAuth flow"
-    exit 1
-fi
-
-BISYNC_ARGS=(
-    "$LOCAL" "$REMOTE"
+RCLONE_FLAGS=(
+    --s3-provider Cloudflare
+    --s3-access-key-id "$ACCESS_KEY"
+    --s3-secret-access-key "$SECRET_KEY"
+    --s3-endpoint "$ENDPOINT"
+    --s3-no-check-bucket
     --verbose
-    --conflict-resolve newer
-    --conflict-loser num
-    --max-delete 25
+    --progress
+    --transfers 32
+    --checkers 64
 )
 
-case "${1:-sync}" in
-    init)
-        echo "Initializing bisync baseline: $LOCAL <-> $REMOTE"
-        rclone bisync "${BISYNC_ARGS[@]}" --resync
-        ;;
-    sync)
-        echo "Syncing: $LOCAL <-> $REMOTE"
-        rclone bisync "${BISYNC_ARGS[@]}"
-        ;;
+case "${1:-download}" in
     download)
-        echo "Downloading: $REMOTE -> $LOCAL"
-        rclone copy "$REMOTE" "$LOCAL" --verbose
+        echo "Downloading: R2 -> $LOCAL"
+        rclone copy ":s3:${BUCKET}" "$LOCAL" "${RCLONE_FLAGS[@]}"
         ;;
     upload)
-        echo "Uploading: $LOCAL -> $REMOTE"
-        rclone copy "$LOCAL" "$REMOTE" --verbose
+        echo "Uploading: $LOCAL -> R2"
+        rclone copy "$LOCAL" ":s3:${BUCKET}" "${RCLONE_FLAGS[@]}"
         ;;
     *)
-        echo "Usage: $0 {init|sync|download|upload}"
+        echo "Usage: $0 {download|upload}"
         echo ""
-        echo "  init      First-time bisync (establishes baseline)"
-        echo "  sync      Bidirectional sync (default)"
-        echo "  download  One-way: Drive -> local"
-        echo "  upload    One-way: local -> Drive"
+        echo "  download  R2 -> local (default)"
+        echo "  upload    local -> R2"
         exit 1
         ;;
 esac
