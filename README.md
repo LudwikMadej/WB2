@@ -1,30 +1,23 @@
-# WB2 — CLIP concept debiasing
+# WB2 - CLIP concept debiasing
 
-Debiasing konceptu okularów w CLIP ViT-L/14 na CelebA.
+Projekt bada, jak usunąć niechciane biasy z modelu CLIP ViT-L/14 (model odpowiedniego rozmiaru - ma kilkanaście warstw na których można zrobić debiasing, ale wciąż działa w miarę szybko na słabszym sprzęcie). Punktem wyjścia są koncepty (np. okularów) na zbiorze CelebA.
 
 ## Struktura
 
 ```
-Notebooks/   # 01 loading → 02 activations → 03 detection → 04 debiasing
-               # warianty *_torch.ipynb używają TorchLR (GPU) zamiast sklearn LR
-software/    # helpery: get_raw_{train,test}_data(layer), torch_lr.py
-scripts/     # jednorazowe narzędzia (migrate_csv_to_parquet.py)
-data/        # obrazy CelebA, metadata, aktywacje (parquet, float16 + zstd)
-plots/       # wykresy concept detection (sklearn i torch)
+checkpoints/   # eksperymenty pogrupowane per checkpoint - opis w README każdego z nich
+software/      # współdzielony kod pomocniczy (ładowanie danych, TorchLR)
+scripts/       # narzędzia
+data/          # obrazy CelebA, metadata, aktywacje - poza gitem, pobierane przez rclone
 ```
-
-## Zmiany względem main
-
-1. **Aktywacje: CSV → Parquet (float16 + zstd)** — `scripts/migrate_csv_to_parquet.py` skonwertował aktywacje do parquet ze stratną kompresją. Rozmiar danych ~10× mniejszy. Notatnik `02` zapisuje bezpośrednio w parquet.
-2. **TorchLR** — `software/torch_lr.py`: binarna regresja logistyczna na GPU (LBFGS), drop-in zamiennik sklearn `LogisticRegression`. Identyczna funkcja celu (L2 + BCE).
-3. **Notatniki torch** — `03_concepts_detection_torch.ipynb` i `04_concepts_detection_after_debiasing_torch.ipynb` używają `TorchLR` zamiast sklearn LR. XGBoost bez zmian. Wyniki w osobnych katalogach (`data/torch_lr_*`), nie nadpisują baseline'u sklearn.
-4. **P-ClArC** — notatnik `04_*_torch.ipynb` dodaje trzecią metodę debiasingu (Projective Class Artifact Compensation) obok istniejących LR i DM.
 
 ## Instalacja
 
-Projekt używa nowego standardu: **`pyproject.toml` (PEP 621) + `uv`**. `pyproject.toml` + `uv.lock` to źródło prawdy. `requirements.txt` jest dogenerowywany dla środowisk bez uv (Colab).
+Zależności projektu są zdefiniowane w `pyproject.toml` - to standardowy plik konfiguracyjny Pythona (PEP 621), który zastępuje ręcznie pisane `requirements.txt`. Opisuje jakich pakietów projekt potrzebuje, w jakich wersjach i skąd je pobrać. Na jego podstawie generowany jest `uv.lock` (dokładne, zreprodukowane wersje wszystkich zależności) oraz `requirements.txt` (dla środowisk, które nie obsługują uv).
 
-**Zalecane — `uv` (RunPod, lokalnie):**
+Do instalacji używamy `uv` - nowoczesnego zamiennika `pip`, napisanego w Ruście. Jest wielokrotnie szybszy od pip i sam zarządza wirtualnym środowiskiem, więc nie trzeba ręcznie robić `python -m venv`.
+
+**Lokalnie i na RunPodzie (zalecane):**
 
 ```bash
 pip install uv
@@ -32,21 +25,47 @@ uv sync --extra jupyter
 .venv/bin/python -m ipykernel install --user --name wb2 --display-name "WB2"
 ```
 
-Potem w notatniku: **Kernel → Change Kernel → WB2** → Restart.
+Trzecia komenda rejestruje środowisko jako kernel Jupytera. Bez niej RunPod uruchomi notatnik na systemowym Pythonie i dostaniesz `ModuleNotFoundError`.
 
-Trzecia komenda rejestruje `.venv/` jako kernel Jupytera — bez niej RunPod odpali notatnik na systemowym Pythonie i dostaniesz `ModuleNotFoundError: No module named 'pandas'`.
+Po instalacji: **Kernel → Change Kernel → WB2** → Restart.
 
-**Alternatywnie — Colab (bez uv):**
+**Google Colab:**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-`requirements.txt` ma na pierwszej linii `--extra-index-url` do `download.pytorch.org/whl/cu126`, więc pip znajdzie CUDA wheel torcha.
+## Dane
 
-## Regeneracja `requirements.txt`
+Katalog `data/` nie jest w gicie (jest za duży). Dane trzymamy w Cloudflare R2 i synchronizujemy przez `rclone`.
 
-Po zmianie `pyproject.toml`:
+Instalacja rclone (jednorazowo):
+
+```bash
+# macOS
+brew install rclone
+
+# Linux
+curl https://rclone.org/install.sh | sudo bash
+```
+
+```powershell
+# Windows (PowerShell jako administrator)
+winget install Rclone.Rclone
+```
+
+Pobieranie i wysyłanie danych:
+
+```bash
+./scripts/sync_data.sh           # pobierz
+./scripts/sync_data.sh upload    # wyślij lokalne zmiany
+```
+
+Klucze API są wbudowane w skrypt - nie trzeba nic konfigurować.
+
+## Aktualizacja zależności
+
+Jeśli zmienisz `pyproject.toml`, wygeneruj nowy `requirements.txt`:
 
 ```bash
 uv lock
@@ -56,25 +75,3 @@ uv export --format requirements-txt --no-hashes --no-emit-project \
 ```
 
 Nie edytuj `requirements.txt` ręcznie.
-
-## Dane (obrazy + aktywacje)
-
-Katalog `data/` nie jest w git (za duży). Synchronizacja przez Cloudflare R2 + `rclone`.
-
-```bash
-brew install rclone                    # jednorazowo (macOS)
-# lub: curl https://rclone.org/install.sh | sudo bash   # Linux
-
-./scripts/sync_data.sh                 # pobierz dane
-./scripts/sync_data.sh upload          # wyślij lokalne zmiany
-```
-
-Klucze API są wbudowane w skrypt — nie trzeba nic konfigurować.
-
-## Kolejność notatników
-
-`01_loading_data` → `02_getting_activations` → `03_concepts_detection` → `04_concepts_detection_after_debiasing`.
-
-Warianty `*_torch.ipynb` dla 03 i 04 można uruchomić niezależnie od wersji sklearn — potrzebują tych samych danych z 01/02.
-
-`01` wymaga `.env` z tokenem HuggingFace. `02` potrzebuje GPU.

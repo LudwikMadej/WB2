@@ -1,7 +1,12 @@
 import os
+from pathlib import Path
 import pandas as pd
 
-def get_raw_train_data(layer_index: int, data_folder_path='../data/') -> pd.DataFrame:
+_DATA_DIR = Path(__file__).parent.parent.parent / 'data'
+
+def get_raw_train_data(layer_index: int, data_folder_path=None) -> pd.DataFrame:
+    if data_folder_path is None:
+        data_folder_path = _DATA_DIR
     if layer_index >= 24:
         print(f"Błąd: layer_index {layer_index} jest poza zakresem (dostępnych warstw: 24).")
         return pd.DataFrame()
