@@ -4,9 +4,11 @@
 
 Dwie ścieżki eksperymentów:
 
-- `bald/` — prototyp na koncepcje łysiny, warstwa 15
-- `eyeglasses/` — główna linia: koncept okularów, wszystkie 24 warstwy, debiasing
+- `bald/` - prototyp na koncept łysiny, warstwa 15
+- `eyeglasses/` - główna linia: koncept okularów, wszystkie 24 warstwy, debiasing
 
-## checkpoint_02 — sequential debiasing
+## checkpoint_02 - sequential debiasing & concept recovery
 
-- `sequential_debiasing/` — eksperymenty z sekwencyjnym debasingiem konceptów
+- `01_cav_debiasing.ipynb` - sekwencyjny debiasing 24 warstw, 3 metody CAV (diff_means, lr, pclarc)
+- `02_concept_recovery.ipynb` - multi-koncept × multi-metoda; bada powrót konceptu po jednorazowym debiasingu jednej warstwy
+- `00_sequential_pclark_debiasing.ipynb` - wcześniejszy prototyp P-ClArC (Colab-style), zastąpiony przez `01_*`
