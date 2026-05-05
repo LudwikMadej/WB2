@@ -43,7 +43,7 @@ def plot_concept_detection(df_melted, concept: str, save_path: Path) -> None:
                     linestyle='--' if subset == 'train' else '-',
                 )
 
-            ax.set_xticks(layer_indices)
+            ax.set_xticks(range(len(layer_indices)))
             ax.set_xticklabels([str(i + 1) for i in layer_indices], rotation=90)
             ax.set_xlabel('Layer', fontsize=12)
             ax.yaxis.set_major_locator(ticker.MultipleLocator(0.05))
