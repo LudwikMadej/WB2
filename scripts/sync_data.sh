@@ -36,11 +36,16 @@ case "${1:-download}" in
         echo "Uploading: $LOCAL -> R2"
         rclone copy "$LOCAL" ":s3:${BUCKET}" "${RCLONE_FLAGS[@]}"
         ;;
+    sync)
+        echo "Syncing (Mirroring): $LOCAL -> R2"
+        rclone sync "$LOCAL" ":s3:${BUCKET}" "${RCLONE_FLAGS[@]}"
+        ;;
     *)
-        echo "Usage: $0 {download|upload}"
+        echo "Usage: $0 {download|upload|sync}"
         echo ""
         echo "  download  R2 -> local (default)"
         echo "  upload    local -> R2"
+        echo "  sync    local -> R2 (overwrite)"
         exit 1
         ;;
 esac
