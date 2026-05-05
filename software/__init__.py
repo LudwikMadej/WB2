@@ -1,5 +1,5 @@
 from .torch_lr import TorchLR
-from raw_data import *
+from .raw_data import *
 from .metrics import get_metrics
 from .viz import (
     plot_concept_detection,

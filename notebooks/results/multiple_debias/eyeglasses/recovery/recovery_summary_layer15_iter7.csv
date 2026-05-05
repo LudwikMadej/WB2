@@ -1,0 +1,4 @@
+concept,method,debias_layer,n_iter,baseline_test,after_7iter_test,max_recovery_test,max_recovery_layer
+eyeglasses,diff_means,15,7,0.653,0.552,0.98,23
+eyeglasses,lr,15,7,0.897,0.759,0.984,23
+eyeglasses,pclarc,15,7,0.653,0.467,0.983,23
