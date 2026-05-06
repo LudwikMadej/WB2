@@ -7,6 +7,7 @@ from .viz import (
     plot_cav_accuracy_per_layer,
     plot_recovery,
 )
+from .dataset import get_concept_split, DS_SIZE
 
 __all__ = [
     "TorchLR",
@@ -17,4 +18,6 @@ __all__ = [
     "plot_debiased_detection",
     "plot_cav_accuracy_per_layer",
     "plot_recovery",
+    "get_concept_split",
+    "DS_SIZE",
 ]
