@@ -19,8 +19,14 @@ nvidia-smi --query-gpu=name --format=csv,noheader | grep -qiE '5090|RTX PRO 6000
 
 # 1. env (idempotent)
 [ -x .venv/bin/python ] || { pip install -q uv && uv sync --extra jupyter; }
-.venv/bin/python -m ipykernel install --prefix="$REPO/.venv" --name python3 --display-name WB2 >/dev/null 2>&1 || true
+# Install the venv kernel into a dir we own and put FIRST on JUPYTER_PATH, so
+# nbconvert resolves kernel "wb2" to .venv/bin/python regardless of any
+# competing system "python3" kernelspec in the base image (Vast ships one).
+KDIR=/tmp/wb2_kernel; rm -rf "$KDIR"
+.venv/bin/python -m ipykernel install --prefix="$KDIR" --name wb2 --display-name WB2 >/dev/null 2>&1
+export JUPYTER_PATH="$KDIR/share/jupyter"
 .venv/bin/python -c "import torch,pandas,transformers,xgboost,sklearn; assert torch.cuda.is_available(); print('env OK',torch.__version__,torch.cuda.get_device_name(0))"
+.venv/bin/python -m jupyter kernelspec list 2>&1 | grep -q "wb2 .*$KDIR" || { echo "FATAL: wb2 kernel not registered"; exit 3; }
 
 # 2. source data from R2 (only if absent)
 { [ -f data/metadata.csv ] && [ -d data/activations/raw ]; } || ./scripts/sync_data.sh download
@@ -47,7 +53,7 @@ PY
 for nb in $PER $DIST; do
   o=$(echo "$nb" | tr / _); echo "[$(date +%T)] $nb"
   .venv/bin/python -m jupyter nbconvert --to notebook --execute \
-    --ExecutePreprocessor.timeout=-1 --ExecutePreprocessor.kernel_name=python3 \
+    --ExecutePreprocessor.timeout=-1 --ExecutePreprocessor.kernel_name=wb2 \
     --output-dir /tmp/wb2_exec --output "$o" "$nb" > "$LOG/$o.log" 2>&1 \
     || { echo "FAILED $nb"; tail -40 "$LOG/$o.log"; exit 1; }
 done
