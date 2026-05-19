@@ -1,0 +1,4 @@
+concept,method,debias_layer,n_iter,baseline_test,after_7iter_test,max_recovery_test,max_recovery_layer
+male,diff_means,15,7,0.79,0.432,0.986,21
+male,lr,15,7,0.917,0.641,0.986,21
+male,pclarc,15,7,0.79,0.531,0.986,21

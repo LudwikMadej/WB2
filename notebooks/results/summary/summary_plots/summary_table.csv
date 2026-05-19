@@ -1,0 +1,14 @@
+Regime,CAV Method,Median ΔBA (target),Min ΔBA (target),Mean collateral ΔBA,# damaged attributes,n concepts
+Iterative all-layers,lr,-0.3477,-0.4453,-0.1382,149,5
+Single layer,diff_means,-0.3398,-0.4727,-0.0096,49,5
+Sequential (24L),lr,-0.2734,-0.3906,-0.0053,48,5
+Sequential (24L),diff_means,-0.2617,-0.4453,-0.0115,65,5
+Iterative all-layers,pclarc,-0.2578,-0.4805,-0.1362,150,5
+Single layer,lr,-0.2578,-0.3711,-0.0012,23,5
+Single layer,pclarc,-0.2305,-0.4844,-0.0128,58,5
+Sequential (24L),pclarc,-0.2266,-0.4883,-0.0112,62,5
+Iterative (single layer),lr,-0.0039,-0.0117,-0.0001,31,5
+Fixed multi-layer,diff_means,0.0,-0.0117,-0.0002,11,5
+Fixed multi-layer,lr,0.0,-0.0078,-0.0008,8,5
+Fixed multi-layer,pclarc,0.0,-0.0039,-0.001,9,5
+Iterative (single layer),pclarc,0.0,-0.0078,0.0006,33,5

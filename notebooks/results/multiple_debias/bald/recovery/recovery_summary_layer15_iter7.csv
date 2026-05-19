@@ -1,0 +1,4 @@
+concept,method,debias_layer,n_iter,baseline_test,after_7iter_test,max_recovery_test,max_recovery_layer
+bald,diff_means,15,7,0.757,0.502,0.95,23
+bald,lr,15,7,0.895,0.821,0.95,23
+bald,pclarc,15,7,0.757,0.513,0.95,23

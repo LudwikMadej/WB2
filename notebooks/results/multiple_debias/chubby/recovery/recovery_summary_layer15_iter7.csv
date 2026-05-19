@@ -1,0 +1,4 @@
+concept,method,debias_layer,n_iter,baseline_test,after_7iter_test,max_recovery_test,max_recovery_layer
+chubby,diff_means,15,7,0.71,0.457,0.846,23
+chubby,lr,15,7,0.827,0.775,0.85,17
+chubby,pclarc,15,7,0.71,0.459,0.847,23
